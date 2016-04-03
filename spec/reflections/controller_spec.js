@@ -55,6 +55,7 @@ describe('GET /reflections/{id}', function() {
     it('is a 404', function(done) {
       this.request.url = this.request.url + 0;
       server.inject(this.request, (response) => {
+        expect(response.result.error).toEqual('Not Found');
         expect(response.statusCode).toEqual(404);
         done();
       });

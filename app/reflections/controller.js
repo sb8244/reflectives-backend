@@ -14,7 +14,7 @@ function ReflectionsShow(request, reply) {
     if (reflection) {
       reply(reflection.get());
     } else {
-      reply().code(404);
+      reply({ error: 'Not Found' }).code(404);
     }
   });
 }
