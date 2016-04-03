@@ -11,7 +11,11 @@ function ReflectionsIndex(request, reply) {
 
 function ReflectionsShow(request, reply) {
   db.Reflection.findById(request.params.id).then(reflection => {
-    reply(reflection.get());
+    if (reflection) {
+      reply(reflection.get());
+    } else {
+      reply().code(404);
+    }
   });
 }
 
