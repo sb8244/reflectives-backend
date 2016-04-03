@@ -5,12 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jasmine"
+    "test": "NODE_ENV=test jasmine"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "hapi": "^13.2.2"
+    "hapi": "^13.2.2",
+    "pg": "^4.5.2",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.20.0",
+    "sequelize-cli": "^2.3.1"
   },
   "devDependencies": {
     "jasmine": "^2.4.1"

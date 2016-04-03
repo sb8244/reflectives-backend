@@ -1,11 +1,20 @@
+'use strict';
+
+const db = require('../models/index');
+
 function ReflectionsIndex(request, reply) {
-  return reply('reflections index');
+  db.Reflection.all().then(reflections => {
+    let json = reflections.map(reflection => reflection.get());
+    reply(json);
+  });
 }
 
 function ReflectionsShow(request, reply) {
-  return reply(`reflections show ${request.params.id}`)
+  db.Reflection.findById(request.params.id).then(reflection => {
+    reply(reflection.get());
+  });
 }
-  
+
 module.exports = {
   index: ReflectionsIndex,
   show: ReflectionsShow
