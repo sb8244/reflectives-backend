@@ -1,6 +1,6 @@
 'use strict';
 
-const db = require('../models/index');
+const db = require('app/models/index');
 
 function ReflectionsIndex(request, reply) {
   db.Reflection.all().then(reflections => {

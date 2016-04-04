@@ -1,6 +1,6 @@
-const createServer = require('../../app/server').createServer;
+const createServer = require('app/server').createServer;
 const server = createServer();
-const db = require('../../app/models/index');
+const db = require('app/models/index');
 
 function setupReflections(callback) {
   this.reflections = [];

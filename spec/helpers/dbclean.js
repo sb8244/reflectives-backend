@@ -1,4 +1,4 @@
-const db = require('../../app/models/index');
+const db = require('app/models/index');
 
 beforeEach(function(done) {
   Promise.all(Object.keys(db.models).map(modelName => {

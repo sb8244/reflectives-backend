@@ -1,4 +1,5 @@
-const createServer = require('./app/server').createServer;
+require('app-module-path').addPath(__dirname);
+const createServer = require('app/server').createServer;
 const server = createServer();
 
 // Start the server
