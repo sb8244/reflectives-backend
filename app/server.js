@@ -1,6 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi');
+const passwordlessSetup = require('./passwordless').setup;
 
 function createServer() {
   const server = new Hapi.Server();
@@ -24,6 +25,8 @@ function createServer() {
       clearInvalid: false, // remove invalid cookies
       strictHeader: true // don't allow violations of RFC 6265
   });
+
+  passwordlessSetup(server);
 
   return server;
 }
