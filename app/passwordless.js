@@ -5,7 +5,7 @@
  *  Must work with the emailing interface that passwordless defines
  *
  * Initial Functionality
- *  POST /sendtoken - requests a token from passwordless
+ *  ✓ POST /sendtoken - requests a token from passwordless
  *  GET ?pwdless - accepts pwdless token from an email and logs in the user. Works with any url
  *  GET, DELETE /logout - ends the current session
  *  restricted middleware plugin - lock down routes based on something
@@ -25,41 +25,7 @@ function setupHapi(server) {
   server.route({
     method: 'POST',
     path: '/sendtoken',
-    handler: function(request, reply) {
-      let reqAdapter = {
-        body: request.payload, // the body of the request is accessible via the payload
-        method: request.method.toUpperCase() // hapi uses lower case methods
-      };
-
-      let response = {
-        code: undefined,
-        headers: {}
-      };
-
-      let finishRequest = () => {
-        const finalResponse = reply.response(); // only execute our request when "next" is called
-        finalResponse.statusCode = response.code || resAdapter.statusCode;
-        Object.keys(response.headers).forEach(header => finalResponse.header(header, response.headers[header]));
-      };
-
-      let resAdapter = {
-        end: finishRequest,
-        status: function(val) {
-          response.code = val;
-
-          return {
-            send: finishRequest // this is implicit with hapi
-          };
-        },
-        setHeader: function(key, value) {
-          response.headers[key] = value;
-        }
-      };
-
-      passwordless.requestToken(function(user, delivery, callback, req) {
-        callback(null, user);
-      })(reqAdapter, resAdapter, finishRequest);
-    }
+    handler: sendTokenHandler
   });
 };
 
@@ -67,3 +33,44 @@ module.exports = {
   setup: setupHapi,
   passwordless: passwordless
 };
+
+function sendTokenHandler(request, reply) {
+  let reqAdapter = {
+    body: request.payload, // the body of the request is accessible via the payload
+    method: request.method.toUpperCase() // hapi uses lower case methods
+  };
+
+  let response = {
+    code: undefined,
+    headers: {}
+  };
+
+  // Hapi does not support promise based middleware, so must build the request information and finish it
+  let finishRequest = () => {
+    const finalResponse = reply.response(); // only execute our request when "next" is called
+    finalResponse.statusCode = response.code || resAdapter.statusCode;
+    Object.keys(response.headers).forEach(header => finalResponse.header(header, response.headers[header]));
+  };
+
+  let resAdapter = {
+    end: finishRequest,
+    status: function(val) {
+      response.code = val;
+
+      return {
+        send: finishRequest
+      };
+    },
+    setHeader: function(key, value) {
+      response.headers[key] = value;
+    }
+  };
+
+  // Does not support
+  // * failureRedirect
+  // * allowGet
+  // * next with an error
+  passwordless.requestToken(function(user, delivery, callback, req) {
+    callback(null, user);
+  })(reqAdapter, resAdapter, finishRequest);
+}
