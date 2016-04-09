@@ -1,7 +1,15 @@
 'use strict';
 
 const Hapi = require('hapi');
-const passwordlessSetup = require('./passwordless').setup;
+const passwordless = require('passwordless');
+const passwordlessPlugin = require('passwordless-hapi');
+const MemoryStore = require('passwordless-memorystore');
+
+passwordless.init(new MemoryStore());
+passwordless.addDelivery(function(tokenToSend, uidToSend, recipient, callback) {
+  console.log("delivery!", arguments);
+  callback();
+});
 
 function createServer() {
   const server = new Hapi.Server();
@@ -26,7 +34,21 @@ function createServer() {
       strictHeader: true // don't allow violations of RFC 6265
   });
 
-  passwordlessSetup(server);
+  server.register({
+    register: passwordlessPlugin,
+    options: {
+      passwordless: passwordless,
+      onSuccessfulAuth: function(userId) {
+        console.log("Auth success!", userId);
+      },
+      getUserId: function(user, delivery, callback, req) {
+        callback(null, user);
+      },
+      sendTokenSuccessHandler: function(request, reply) {
+        reply('ok!');
+      }
+    }
+  });
 
   return server;
 }
