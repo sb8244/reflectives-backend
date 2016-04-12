@@ -3,11 +3,11 @@ const createServer = serverModule.createServer;
 const passwordless = serverModule.passwordless;
 const server = createServer();
 
-describe("POST /sendtoken", function() {
+describe("POST /auth", function() {
   beforeEach(function() {
     this.request = {
       method: 'POST',
-      url: '/sendtoken',
+      url: '/auth',
       payload: {
         user: 'test@test.com'
       }

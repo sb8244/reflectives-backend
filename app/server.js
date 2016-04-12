@@ -35,6 +35,7 @@ function createServer() {
     register: passwordlessPlugin,
     options: {
       passwordless: passwordless,
+      sendTokenPath: "/auth",
       onSuccessfulAuth: function(reply, uid, request) {
         request.passwordless = { uid: uid };
         reply.continue();
