@@ -1,7 +1,10 @@
+'use strict';
+
 const serverModule = require('app/server');
 const createServer = serverModule.createServer;
 const passwordless = serverModule.passwordless;
 const server = createServer();
+const jwt = require('jsonwebtoken');
 
 describe("POST /auth", function() {
   beforeEach(function() {
@@ -45,6 +48,8 @@ describe("GET /auth?token&uid", function() {
         expect(response.statusCode).toEqual(200);
         expect(response.result.token).toBeDefined();
         expect(response.result.expiresAt).toBeDefined();
+        let payload = jwt.verify(response.result.token, 'test');
+        expect(payload.uid).toEqual('1');
       });
     });
   });
