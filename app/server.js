@@ -17,6 +17,7 @@ function createServer() {
     port: port
   });
 
+  // JWT Auth
   server.register(require('hapi-auth-jwt'), function (error) {
     function validate(request, decodedToken, callback) {
       var error, credentials = { uid: decodedToken.uid };
@@ -35,6 +36,7 @@ function createServer() {
     });
   });
 
+  // Passwordless Auth
   server.register({
     register: passwordlessPlugin,
     options: {
