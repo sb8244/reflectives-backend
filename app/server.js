@@ -21,16 +21,6 @@ function createServer() {
   server.route(require('./reflections/routes'));
   server.route(require('./auth/routes'));
 
-  // Configure Cookies
-  server.state('data', {
-      ttl: null,
-      isSecure: true,
-      isHttpOnly: true,
-      encoding: 'base64json',
-      clearInvalid: false, // remove invalid cookies
-      strictHeader: true // don't allow violations of RFC 6265
-  });
-
   server.register({
     register: passwordlessPlugin,
     options: {
