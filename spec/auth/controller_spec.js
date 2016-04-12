@@ -3,6 +3,32 @@ const createServer = serverModule.createServer;
 const passwordless = serverModule.passwordless;
 const server = createServer();
 
+describe("POST /sendtoken", function() {
+  beforeEach(function() {
+    this.request = {
+      method: 'POST',
+      url: '/sendtoken',
+      payload: {
+        user: 'test@test.com'
+      }
+    };
+
+    spyOn(passwordless._defaultDelivery, 'sendToken').and.callFake((tokenToSend, uidToSend, recipient, callback) => {
+      this.deliveryArgs = { tokenToSend, uidToSend, recipient, callback };
+      callback();
+    });
+    passwordless._defaultDelivery.sendToken.calls.reset();
+  });
+
+  it('is successful', function(done) {
+    server.inject(this.request, function(response) {
+      expect(response.statusCode).toEqual(200);
+      expect(response.result).toEqual({ status: "success" })
+      done();
+    });
+  });
+});
+
 describe("GET /auth?token&uid", function() {
   describe("with a valid token", function() {
     beforeEach(function(done) {
