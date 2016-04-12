@@ -18,8 +18,8 @@ function createServer() {
   });
 
   // Routes
-  const reflections = require('./reflections/routes');
-  server.route(reflections);
+  server.route(require('./reflections/routes'));
+  server.route(require('./auth/routes'));
 
   // Configure Cookies
   server.state('data', {
@@ -35,8 +35,9 @@ function createServer() {
     register: passwordlessPlugin,
     options: {
       passwordless: passwordless,
-      onSuccessfulAuth: function(userId) {
-        console.log("Auth success!", userId);
+      onSuccessfulAuth: function(reply, uid, request) {
+        request.passwordless = { uid: uid };
+        reply.continue();
       },
       getUserId: function(user, delivery, callback, req) {
         callback(null, user);
@@ -51,5 +52,6 @@ function createServer() {
 }
 
 module.exports = {
-  createServer: createServer
+  createServer: createServer,
+  passwordless: passwordless
 };
