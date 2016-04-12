@@ -3,7 +3,7 @@ const Boom = require('boom');
 
 function AuthEndpoint(request, reply) {
   if (request.passwordless) {
-    jwt.sign({ uid: request.passwordless.uid }, 'shhhh', {}, function(token) {
+    jwt.sign({ uid: request.passwordless.uid }, process.env.JWT_AUTH_SECRET, {}, function(token) {
       reply({
         token: token,
         expiresAt: (new Date()).getTime() + 60 * 60 * 24 * 1000 // 24 hours from now
