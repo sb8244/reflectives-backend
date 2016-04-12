@@ -1,6 +1,7 @@
 const createServer = require('app/server').createServer;
 const server = createServer();
 const db = require('app/models/index');
+const authHelper = require('../helpers/auth');
 
 function setupReflections(callback) {
   this.reflections = [];
@@ -14,7 +15,10 @@ describe('GET /reflections', function() {
   beforeEach(function(done) {
     this.request = {
       method: 'GET',
-      url: '/reflections'
+      url: '/reflections',
+      headers: {
+        Authorization: `Bearer ${authHelper.getToken()}`
+      }
     };
 
     setupReflections.bind(this)(done);
@@ -29,13 +33,24 @@ describe('GET /reflections', function() {
       done();
     });
   });
+
+  it('requires headers', function(done) {
+    delete this.request.headers;
+    server.inject(this.request, (response) => {
+      expect(response.statusCode).toEqual(401);
+      done();
+    });
+  });
 });
 
 describe('GET /reflections/{id}', function() {
   beforeEach(function(done) {
     this.request = {
       method: 'GET',
-      url: '/reflections/'
+      url: '/reflections/',
+      headers: {
+        Authorization: `Bearer ${authHelper.getToken()}`
+      }
     };
 
     setupReflections.bind(this)(done);
@@ -59,6 +74,15 @@ describe('GET /reflections/{id}', function() {
         expect(response.statusCode).toEqual(404);
         done();
       });
+    });
+  });
+
+  it('requires headers', function(done) {
+    this.request.url = this.request.url + this.reflections[0].id;
+    delete this.request.headers;
+    server.inject(this.request, (response) => {
+      expect(response.statusCode).toEqual(401);
+      done();
     });
   });
 });

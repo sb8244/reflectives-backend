@@ -17,9 +17,23 @@ function createServer() {
     port: port
   });
 
-  // Routes
-  server.route(require('./reflections/routes'));
-  server.route(require('./auth/routes'));
+  server.register(require('hapi-auth-jwt'), function (error) {
+    function validate(request, decodedToken, callback) {
+      var error, credentials = { uid: decodedToken.uid };
+
+      if (!credentials) {
+        return callback(error, false, credentials);
+      }
+
+      return callback(error, true, credentials)
+    }
+
+    server.auth.strategy('token', 'jwt', {
+      key: process.env.JWT_AUTH_SECRET,
+      validateFunc: validate,
+      verifyOptions: { algorithms: [ 'HS256' ] }
+    });
+  });
 
   server.register({
     register: passwordlessPlugin,
@@ -38,6 +52,10 @@ function createServer() {
       }
     }
   });
+
+  // Routes
+  server.route(require('./reflections/routes'));
+  server.route(require('./auth/routes'));
 
   return server;
 }
