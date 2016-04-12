@@ -43,7 +43,7 @@ function createServer() {
         callback(null, user);
       },
       sendTokenSuccessHandler: function(request, reply) {
-        reply('ok!');
+        reply({ status: "success" });
       }
     }
   });
