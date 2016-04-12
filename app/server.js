@@ -6,10 +6,7 @@ const passwordlessPlugin = require('passwordless-hapi');
 const MemoryStore = require('passwordless-memorystore');
 
 passwordless.init(new MemoryStore());
-passwordless.addDelivery(function(tokenToSend, uidToSend, recipient, callback) {
-  console.log("delivery!", arguments);
-  callback();
-});
+passwordless.addDelivery(require('./email/passwordless'));
 
 function createServer() {
   const server = new Hapi.Server();

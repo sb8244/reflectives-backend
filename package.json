@@ -14,6 +14,7 @@
     "boom": "^3.1.2",
     "hapi": "^13.2.2",
     "hoek": "^3.0.4",
+    "nodemailer": "^2.3.2",
     "passwordless-hapi": "0.0.1",
     "pg": "^4.5.2",
     "pg-hstore": "^2.3.2",
