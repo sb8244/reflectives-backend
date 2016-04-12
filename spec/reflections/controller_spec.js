@@ -41,6 +41,14 @@ describe('GET /reflections', function() {
       done();
     });
   });
+
+  it('requires fresh headers', function(done) {
+    this.request.headers.Authorization = `Bearer ${authHelper.getExpiredToken()}`
+    server.inject(this.request, (response) => {
+      expect(response.statusCode).toEqual(401);
+      done();
+    });
+  });
 });
 
 describe('GET /reflections/{id}', function() {
