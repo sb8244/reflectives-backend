@@ -14,7 +14,10 @@ function createServer() {
 
   server.connection({
     host: 'localhost',
-    port: port
+    port: port,
+    routes: {
+      cors: true
+    }
   });
 
   // JWT Auth
