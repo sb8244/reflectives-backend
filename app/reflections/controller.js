@@ -3,14 +3,14 @@
 const db = require('app/models/index');
 
 function ReflectionsIndex(request, reply) {
-  db.Reflection.all().then(reflections => {
-    let json = reflections.map(reflection => reflection.get());
+  db.reflection.all().then(reflections => {
+    let json = reflections.map(reflection => reflection.toJSON());
     reply(json);
   });
 }
 
 function ReflectionsShow(request, reply) {
-  db.Reflection.findById(request.params.id).then(reflection => {
+  db.reflection.findById(request.params.id).then(reflection => {
     if (reflection) {
       reply(reflection.get());
     } else {
@@ -19,7 +19,18 @@ function ReflectionsShow(request, reply) {
   });
 }
 
+function ReflectionsCollectionCreate(request, reply) {
+  db.reflectionCollection.create({
+    reflections: request.payload.reflections
+  }, {
+    include: [ db.reflection ]
+  }).then((reflectionCollection) => {
+    reply(reflectionCollection.toJSON());
+  });
+}
+
 module.exports = {
   index: ReflectionsIndex,
-  show: ReflectionsShow
+  show: ReflectionsShow,
+  createCollection: ReflectionsCollectionCreate
 };

@@ -1,16 +1,15 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Reflection = sequelize.define('Reflection', {
+  var Reflection = sequelize.define('reflection', {
     name: DataTypes.STRING,
     html: DataTypes.TEXT,
     secondsOfWriting: DataTypes.INTEGER
   }, {
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        models.reflection.belongsTo(models.reflectionCollection);
       }
-    },
-    tableName: 'reflections'
+    }
   });
   return Reflection;
 };

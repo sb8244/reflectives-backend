@@ -6,8 +6,8 @@ const authHelper = require('../helpers/auth');
 function setupReflections(callback) {
   this.reflections = [];
   Promise.all([
-    db.Reflection.create({ name: 'Test', html: '', secondsOfWriting: 1 }).then(model => this.reflections.push(model)),
-    db.Reflection.create({ name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }).then(model => this.reflections.push(model))
+    db.reflection.create({ reflectionCollectionId: 1, name: 'Test', html: '', secondsOfWriting: 1 }).then(model => this.reflections.push(model)),
+    db.reflection.create({ reflectionCollectionId: 1, name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }).then(model => this.reflections.push(model))
   ]).then(callback);
 }
 
@@ -91,6 +91,56 @@ describe('GET /reflections/{id}', function() {
     server.inject(this.request, (response) => {
       expect(response.statusCode).toEqual(401);
       done();
+    });
+  });
+});
+
+describe('POST reflections', function() {
+  beforeEach(function() {
+    this.request = {
+      method: 'POST',
+      url: '/reflections',
+      headers: {
+        Authorization: `Bearer ${authHelper.getToken()}`
+      },
+      payload: {
+        reflections: [
+          {
+            name: "A",
+            html: "<div>A</div>",
+            secondsOfWriting: 1
+          },
+          {
+            name: "B",
+            html: "<div>B</div>",
+            secondsOfWriting: 2
+          }
+        ]
+      }
+    };
+  });
+
+  it("responds with the created collection", function(done) {
+    server.inject(this.request, (response) => {
+      expect(response.statusCode).toEqual(200);
+      expect(response.result.reflections.length).toEqual(2);
+      done();
+    });
+  });
+
+  it("creates a new reflectionCollection with multiple reflections", function(done) {
+    server.inject(this.request, (response) => {
+
+      db.reflectionCollection.count().then((count) => {
+        expect(count).toEqual(1);
+
+        db.reflectionCollection.findOne().then((collection) => {
+          collection.getReflections().then((reflections) => {
+            expect(reflections.length).toEqual(2);
+            done();
+          });
+        });
+      });
     });
   });
 });

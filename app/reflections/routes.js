@@ -14,4 +14,11 @@ module.exports = [{
   config: {
     auth: 'token'
   }
+}, {
+  method: 'POST',
+  path:'/reflections',
+  handler: Controller.createCollection,
+  config: {
+    auth: 'token'
+  }
 }];
