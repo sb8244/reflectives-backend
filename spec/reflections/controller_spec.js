@@ -95,7 +95,6 @@ describe('POST reflections', function() {
 
   it("creates a new reflectionCollection with multiple reflections", function(done) {
     server.inject(this.request, (response) => {
-
       db.reflectionCollection.count().then((count) => {
         expect(count).toEqual(1);
 
@@ -105,6 +104,17 @@ describe('POST reflections', function() {
             done();
           });
         });
+      });
+    });
+  });
+
+  it("cleanly handles errors in the reflections", function(done) {
+    delete this.request.payload.reflections[1].name;
+    server.inject(this.request, (response) => {
+      db.reflection.count().then((count) => {
+        expect(count).toEqual(0);
+        expect(response.statusCode).toEqual(422);
+        done();
       });
     });
   });

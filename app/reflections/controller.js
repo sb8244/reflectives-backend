@@ -1,6 +1,7 @@
 'use strict';
 
 const db = require('app/models/index');
+const Boom = require('boom');
 
 function ReflectionsIndex(request, reply) {
   db.reflectionCollection.all({
@@ -15,12 +16,17 @@ function ReflectionsIndex(request, reply) {
 }
 
 function ReflectionsCollectionCreate(request, reply) {
-  db.reflectionCollection.create({
-    reflections: request.payload.reflections
-  }, {
-    include: [ db.reflection ]
-  }).then((reflectionCollection) => {
-    reply(reflectionCollection.toJSON());
+  db.sequelize.transaction((t) => {
+    return db.reflectionCollection.create({
+      reflections: request.payload.reflections
+    }, {
+      include: [ db.reflection ],
+      transaction: t
+    }).then((reflectionCollection) => {
+      reply(reflectionCollection.toJSON());
+    }).catch((errors) => {
+      reply(Boom.badData('Reflections not saved due to missing data'));
+    });
   });
 }
 
