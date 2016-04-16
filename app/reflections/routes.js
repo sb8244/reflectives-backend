@@ -8,13 +8,6 @@ module.exports = [{
     auth: 'token'
   }
 }, {
-  method: 'GET',
-  path:'/reflections/{id}',
-  handler: Controller.show,
-  config: {
-    auth: 'token'
-  }
-}, {
   method: 'POST',
   path:'/reflections',
   handler: Controller.createCollection,

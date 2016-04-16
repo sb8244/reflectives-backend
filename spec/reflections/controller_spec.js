@@ -60,50 +60,6 @@ describe('GET /reflections', function() {
   });
 });
 
-describe('GET /reflections/{id}', function() {
-  beforeEach(function(done) {
-    this.request = {
-      method: 'GET',
-      url: '/reflections/',
-      headers: {
-        Authorization: `Bearer ${authHelper.getToken()}`
-      }
-    };
-
-    setupReflections.bind(this)(done);
-  });
-
-  it('shows reflections', function(done) {
-    this.request.url = this.request.url + this.reflections[0].id;
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(200);
-      expect(response.result.id).toEqual(this.reflections[0].id);
-      expect(response.result.name).toEqual(this.reflections[0].name);
-      done();
-    });
-  });
-
-  describe('with an invalid id', function() {
-    it('is a 404', function(done) {
-      this.request.url = this.request.url + 0;
-      server.inject(this.request, (response) => {
-        expect(response.result.error).toEqual('Not Found');
-        expect(response.statusCode).toEqual(404);
-        done();
-      });
-    });
-  });
-
-  it('requires headers', function(done) {
-    this.request.url = this.request.url + this.reflections[0].id;
-    delete this.request.headers;
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(401);
-      done();
-    });
-  });
-});
-
 describe('POST reflections', function() {
   beforeEach(function() {
     this.request = {
