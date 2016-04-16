@@ -4,6 +4,7 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         models.reflectionCollection.hasMany(models.reflection);
+        models.reflectionCollection.hasMany(models.reminder);
       }
     }
   });
