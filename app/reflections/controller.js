@@ -3,7 +3,12 @@
 const db = require('app/models/index');
 
 function ReflectionsIndex(request, reply) {
-  db.reflectionCollection.all({ include: [db.reflection] }).then(collection => {
+  db.reflectionCollection.all({
+    include: [ db.reflection ],
+    order: [
+      [ db.reflection, 'id', 'ASC' ]
+    ]
+  }).then(collection => {
     let json = collection.map(collection => collection.toJSON());
     reply(json);
   });
