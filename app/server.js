@@ -4,6 +4,7 @@ const Hapi = require('hapi');
 const passwordless = require('passwordless');
 const passwordlessPlugin = require('passwordless-hapi');
 const MemoryStore = require('passwordless-memorystore');
+const db = require('app/models');
 
 passwordless.init(new MemoryStore());
 passwordless.addDelivery(require('./email/passwordless'));
@@ -45,9 +46,11 @@ function createServer() {
     options: {
       passwordless: passwordless,
       sendTokenPath: "/auth",
-      onSuccessfulAuth: function(reply, uid, request) {
-        request.passwordless = { uid: uid };
-        reply.continue();
+      onSuccessfulAuth: function(reply, emailAddress, request) {
+        db.user.findOrCreate({ where: { email: emailAddress }}).spread((user) => {
+          request.passwordless = { uid: user.get('id') };
+          reply.continue();
+        });
       },
       getUserId: function(user, delivery, callback, req) {
         callback(null, user);
