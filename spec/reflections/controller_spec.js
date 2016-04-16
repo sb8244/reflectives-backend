@@ -5,10 +5,18 @@ const authHelper = require('../helpers/auth');
 
 function setupReflections(callback) {
   this.reflections = [];
-  Promise.all([
-    db.reflection.create({ reflectionCollectionId: 1, name: 'Test', html: '', secondsOfWriting: 1 }).then(model => this.reflections.push(model)),
-    db.reflection.create({ reflectionCollectionId: 1, name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }).then(model => this.reflections.push(model))
-  ]).then(callback);
+
+  db.reflectionCollection.create({
+    reflections: [
+      { name: 'Test', html: '', secondsOfWriting: 1 },
+      { name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }
+    ]
+  }, {
+    include: [ db.reflection ]
+  }).then((reflectionCollection) => {
+    this.reflections = reflectionCollection.get('reflections');
+    callback();
+  });
 }
 
 describe('GET /reflections', function() {
@@ -27,9 +35,10 @@ describe('GET /reflections', function() {
   it('shows reflections', function(done) {
     server.inject(this.request, (response) => {
       expect(response.statusCode).toEqual(200);
-      expect(response.result.length).toEqual(2);
-      expect(response.result[0].id).toEqual(this.reflections[0].id);
-      expect(response.result[0].name).toEqual('Test');
+      expect(response.result.length).toEqual(1);
+      expect(response.result[0].reflections.length).toEqual(2);
+      expect(response.result[0].reflections[0].id).toEqual(this.reflections[0].id);
+      expect(response.result[0].reflections[0].name).toEqual('Test');
       done();
     });
   });

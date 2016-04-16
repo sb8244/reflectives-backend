@@ -3,8 +3,8 @@
 const db = require('app/models/index');
 
 function ReflectionsIndex(request, reply) {
-  db.reflection.all().then(reflections => {
-    let json = reflections.map(reflection => reflection.toJSON());
+  db.reflectionCollection.all({ include: [db.reflection] }).then(collection => {
+    let json = collection.map(collection => collection.toJSON());
     reply(json);
   });
 }
