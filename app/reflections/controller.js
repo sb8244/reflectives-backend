@@ -25,7 +25,7 @@ function ReflectionsCollectionCreate(request, reply) {
     }).then((reflectionCollection) => {
       reply(reflectionCollection.toJSON());
     }).catch((errors) => {
-      reply(Boom.badData('Reflections not saved due to missing data'));
+      reply(Boom.badData('Reflections not fully filled out. Try again once you fill out all reflections.'));
     });
   });
 }
