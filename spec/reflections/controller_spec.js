@@ -14,8 +14,7 @@ function* setupReflections(user) {
     include: [ db.reflection ]
   });
 
-  let reflectionCollection = yield db.reflectionCollection.create();
-  yield user.addReflectionCollection(reflectionCollection);
+  let reflectionCollection = yield user.createReflectionCollection();
 
   return [
     yield reflectionCollection.createReflection({ name: 'Test', html: '<div></div>', secondsOfWriting: 1, order: 1 }),
