@@ -4,35 +4,24 @@ const db = require('app/models');
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport(process.env.SMTP_TRANSPORTER);
 const sendReminder = require('app/email/reminder');
+const co = require('co');
 
-class ScheduledEmailJob {
-  call() {
-    return new Promise((resolve, reject) => {
-      db.reminder.findAll({
-        where: {
-          status: 'pending',
-          sendAt: {
-            $lte: new Date()
-          }
+module.exports = {
+  transporter: transporter,
+  call: co.wrap(function*() {
+    const reminders = yield db.reminder.findAll({
+      where: {
+        status: 'pending',
+        sendAt: {
+          $lte: new Date()
         }
-      }).then((reminders) => {
-        let promises = Promise.all(reminders.map((reminder) => {
-          return sendReminder(transporter, reminder);
-        }));
-
-        promises.then(resolve).catch(resolve);
-      });
+      },
+      include: [ db.user, db.reflectionCollection ]
     });
-  }
 
-  static call() {
-    let job = new ScheduledEmailJob();
-    return job.call();
-  }
-
-  static transporter() {
-    return transporter;
-  }
-}
-
-module.exports = ScheduledEmailJob;
+    yield reminders.map(function*(reminder) {
+      let reflections = yield reminder.reflectionCollection.getReflections();
+      return sendReminder(transporter, reminder, reflections);
+    });
+  })
+};
