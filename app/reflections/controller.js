@@ -37,7 +37,7 @@ function* ReflectionsCollectionCreate(request, reply) {
       include: [ db.reflection ],
       transaction: t
     }).then((reflectionCollection) => {
-      reflectionCollection.addUser(user).then(() => {
+      return reflectionCollection.addUser(user, { transaction: t }).then(() => {
         reply(reflectionCollection.toJSON());
       });
     }).catch((errors) => {
