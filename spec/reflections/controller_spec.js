@@ -18,8 +18,8 @@ function* setupReflections(user) {
   yield user.addReflectionCollection(reflectionCollection);
 
   return [
-    yield reflectionCollection.createReflection({ name: 'Test', html: '<div></div>', secondsOfWriting: 1 }),
-    yield reflectionCollection.createReflection({ name: 'Test 2', html: '<p>Hi1</p>', secondsOfWriting: 2 })
+    yield reflectionCollection.createReflection({ name: 'Test', html: '<div></div>', secondsOfWriting: 1, order: 1 }),
+    yield reflectionCollection.createReflection({ name: 'Test 2', html: '<p>Hi1</p>', secondsOfWriting: 2, order: 0 })
   ];
 }
 
@@ -37,13 +37,13 @@ describe('GET /reflections', function() {
     };
   });
 
-  it('shows the user reflections', function*() {
+  fit('shows the user reflections sorted by order ASC', function*() {
     let response = yield new Promise((resolve) => server.inject(this.request, resolve));
     expect(response.statusCode).toEqual(200);
     expect(response.result.length).toEqual(1);
     expect(response.result[0].reflections.length).toEqual(2);
-    expect(response.result[0].reflections[0].id).toEqual(this.reflections[0].id);
-    expect(response.result[0].reflections[0].name).toEqual('Test');
+    expect(response.result[0].reflections[0].id).toEqual(this.reflections[1].id);
+    expect(response.result[0].reflections[0].name).toEqual('Test 2');
   });
 
   it('requires headers', function*() {

@@ -3,14 +3,22 @@
 const db = require('app/models/index');
 const Boom = require('boom');
 const co = require('co');
+const _ = require('lodash');
 
 function* ReflectionsIndex(request, reply) {
   let user = request.auth.credentials;
-
-  const collections = yield user.getReflectionCollections({
-    include: [ db.reflection ]
+  let collections = yield user.getReflectionCollections({
+    include: [ db.reflection ],
+    order: [
+      [ db.reflection, 'order', 'ASC' ]
+    ]
   });
-  reply(collections.map(collection => collection.toJSON()));
+
+  reply(collections.map(collection => {
+    let json = collection.toJSON();
+    json.reflections = _.sortBy(json.reflections, 'order');
+    return json;
+  }));
 }
 
 function* ReflectionsCollectionCreate(request, reply) {

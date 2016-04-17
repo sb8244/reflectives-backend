@@ -16,6 +16,7 @@
     "hapi-auth-jwt": "^4.0.0",
     "hoek": "^3.0.4",
     "jsonwebtoken": "^5.7.0",
+    "lodash": "^4.11.1",
     "nodemailer": "^2.3.2",
     "passwordless-hapi": "0.0.3",
     "pg": "^4.5.2",
