@@ -17,6 +17,7 @@ function* ReflectionsIndex(request, reply) {
   reply(collections.map(collection => {
     let json = collection.toJSON();
     json.reflections = _.sortBy(json.reflections, 'order');
+    delete json.userReflectionCollection;
     return json;
   }));
 }
@@ -25,8 +26,13 @@ function* ReflectionsCollectionCreate(request, reply) {
   db.sequelize.transaction((t) => {
     let user = request.auth.credentials;
 
+    let payload = request.payload.reflections.map((params, order) => {
+      params.order = order;
+      return params;
+    });
+
     return db.reflectionCollection.create({
-      reflections: request.payload.reflections
+      reflections: payload
     }, {
       include: [ db.reflection ],
       transaction: t

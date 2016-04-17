@@ -37,7 +37,7 @@ describe('GET /reflections', function() {
     };
   });
 
-  fit('shows the user reflections sorted by order ASC', function*() {
+  it('shows the user reflections sorted by order ASC', function*() {
     let response = yield new Promise((resolve) => server.inject(this.request, resolve));
     expect(response.statusCode).toEqual(200);
     expect(response.result.length).toEqual(1);
@@ -106,6 +106,8 @@ describe('POST reflections', function() {
     let collection = yield db.reflectionCollection.findOne();
     let reflections = yield collection.getReflections();
     expect(reflections.length).toEqual(2);
+    expect(reflections[0].order).toEqual(0);
+    expect(reflections[1].order).toEqual(1);
   });
 
   it("cleanly handles errors in the reflections", function*() {
