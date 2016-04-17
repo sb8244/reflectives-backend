@@ -26,11 +26,13 @@ function createServer() {
     function validate(request, decodedToken, callback) {
       var error, credentials = { uid: decodedToken.uid };
 
-      if (!credentials) {
-        return callback(error, false, credentials);
-      }
+      db.user.findOne({ email: decodedToken.uid }).then((user) => {
+        if (!user) {
+          return callback(error, false, credentials);
+        }
 
-      return callback(error, true, credentials)
+        return callback(error, true, user)
+      });
     }
 
     server.auth.strategy('token', 'jwt', {
