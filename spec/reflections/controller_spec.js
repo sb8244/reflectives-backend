@@ -5,33 +5,39 @@ const server = createServer();
 const db = require('app/models/index');
 const authHelper = require('../helpers/auth');
 
-function* setupReflections() {
-  let reflectionCollection = yield db.reflectionCollection.create({
+function* setupReflections(user) {
+  yield db.reflectionCollection.create({
     reflections: [
-      { name: 'Test', html: '', secondsOfWriting: 1 },
-      { name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }
+      { name: 'Not Mine', html: '', secondsOfWriting: 1 },
     ]
   }, {
     include: [ db.reflection ]
   });
 
-  return reflectionCollection.get('reflections');
+  let reflectionCollection = yield db.reflectionCollection.create();
+  yield user.addReflectionCollection(reflectionCollection);
+
+  return [
+    yield reflectionCollection.createReflection({ name: 'Test', html: '<div></div>', secondsOfWriting: 1 }),
+    yield reflectionCollection.createReflection({ name: 'Test 2', html: '<p>Hi1</p>', secondsOfWriting: 2 })
+  ];
 }
 
 describe('GET /reflections', function() {
   beforeEach(function*() {
+    this.user = yield db.user.create({ email: 'test@test.com' });
+    this.reflections = yield setupReflections(this.user);
+
     this.request = {
       method: 'GET',
       url: '/reflections',
       headers: {
-        Authorization: `Bearer ${yield authHelper.getToken()}`
+        Authorization: `Bearer ${yield authHelper.getToken(this.user)}`
       }
     };
-
-    this.reflections = yield setupReflections();
   });
 
-  it('shows reflections', function*() {
+  it('shows the user reflections', function*() {
     let response = yield new Promise((resolve) => server.inject(this.request, resolve));
     expect(response.statusCode).toEqual(200);
     expect(response.result.length).toEqual(1);
@@ -55,11 +61,12 @@ describe('GET /reflections', function() {
 
 describe('POST reflections', function() {
   beforeEach(function*() {
+    this.user = yield db.models.user.create({ email: 'test@test.com' });
     this.request = {
       method: 'POST',
       url: '/reflections',
       headers: {
-        Authorization: `Bearer ${yield authHelper.getToken()}`
+        Authorization: `Bearer ${yield authHelper.getToken(this.user)}`
       },
       payload: {
         reflections: [
@@ -82,6 +89,13 @@ describe('POST reflections', function() {
     let response = yield new Promise((resolve) => server.inject(this.request, resolve));
     expect(response.statusCode).toEqual(200);
     expect(response.result.reflections.length).toEqual(2);
+  });
+
+  it('creates the collection off of auth User', function*() {
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    let userCollections = yield this.user.getReflectionCollections();
+    expect(response.statusCode).toEqual(200);
+    expect(userCollections.length).toEqual(1);
   });
 
   it("creates a new reflectionCollection with multiple reflections", function*() {

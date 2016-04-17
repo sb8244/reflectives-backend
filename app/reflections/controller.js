@@ -2,28 +2,30 @@
 
 const db = require('app/models/index');
 const Boom = require('boom');
+const co = require('co');
 
-function ReflectionsIndex(request, reply) {
-  db.reflectionCollection.all({
-    include: [ db.reflection ],
-    order: [
-      [ db.reflection, 'id', 'ASC' ]
-    ]
-  }).then(collection => {
-    let json = collection.map(collection => collection.toJSON());
-    reply(json);
+function* ReflectionsIndex(request, reply) {
+  let user = request.auth.credentials;
+
+  const collections = yield user.getReflectionCollections({
+    include: [ db.reflection ]
   });
+  reply(collections.map(collection => collection.toJSON()));
 }
 
-function ReflectionsCollectionCreate(request, reply) {
+function* ReflectionsCollectionCreate(request, reply) {
   db.sequelize.transaction((t) => {
+    let user = request.auth.credentials;
+
     return db.reflectionCollection.create({
       reflections: request.payload.reflections
     }, {
       include: [ db.reflection ],
       transaction: t
     }).then((reflectionCollection) => {
-      reply(reflectionCollection.toJSON());
+      reflectionCollection.addUser(user).then(() => {
+        reply(reflectionCollection.toJSON());
+      });
     }).catch((errors) => {
       reply(Boom.badData('Reflections not fully filled out. Try again once you fill out all reflections.'));
     });
@@ -31,6 +33,6 @@ function ReflectionsCollectionCreate(request, reply) {
 }
 
 module.exports = {
-  index: ReflectionsIndex,
-  createCollection: ReflectionsCollectionCreate
+  index: co.wrap(ReflectionsIndex),
+  createCollection: co.wrap(ReflectionsCollectionCreate)
 };
