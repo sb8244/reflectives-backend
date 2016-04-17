@@ -1,10 +1,16 @@
+'use strict';
+
 const jwt = require('jsonwebtoken');
+const co = require('co');
+const db = require('app/models');
 
 module.exports = {
-  getToken: function(uid) {
-    return jwt.sign({ uid: (uid || '1') }, 'test');
-  },
-  getExpiredToken: function(uid) {
-    return jwt.sign({ uid: (uid || '1') }, 'test', { expiresIn: -1 });
-  }
+  getToken: co.wrap(function*() {
+    let user = yield db.user.create({ email: Math.random() + '@test.com' });
+    return jwt.sign({ uid: user.get('id') }, 'test');
+  }),
+  getExpiredToken: co.wrap(function*() {
+    let user = yield db.user.create({ email: Math.random() + '@test.com' });
+    return jwt.sign({ uid: user.get('id') }, 'test', { expiresIn: -1 });
+  })
 };

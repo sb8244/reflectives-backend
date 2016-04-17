@@ -24,7 +24,7 @@ describe('GET /reflections', function() {
       method: 'GET',
       url: '/reflections',
       headers: {
-        Authorization: `Bearer ${authHelper.getToken()}`
+        Authorization: `Bearer ${yield authHelper.getToken()}`
       }
     };
 
@@ -47,19 +47,19 @@ describe('GET /reflections', function() {
   });
 
   it('requires fresh headers', function*() {
-    this.request.headers.Authorization = `Bearer ${authHelper.getExpiredToken()}`;
+    this.request.headers.Authorization = `Bearer ${yield authHelper.getExpiredToken()}`;
     let response = yield new Promise((resolve) => server.inject(this.request, resolve));
     expect(response.statusCode).toEqual(401);
   });
 });
 
 describe('POST reflections', function() {
-  beforeEach(function() {
+  beforeEach(function*() {
     this.request = {
       method: 'POST',
       url: '/reflections',
       headers: {
-        Authorization: `Bearer ${authHelper.getToken()}`
+        Authorization: `Bearer ${yield authHelper.getToken()}`
       },
       payload: {
         reflections: [
