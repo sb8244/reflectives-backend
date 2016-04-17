@@ -1,26 +1,25 @@
+'use strict';
+
 const createServer = require('app/server').createServer;
 const server = createServer();
 const db = require('app/models/index');
 const authHelper = require('../helpers/auth');
 
-function setupReflections(callback) {
-  this.reflections = [];
-
-  db.reflectionCollection.create({
+function* setupReflections() {
+  let reflectionCollection = yield db.reflectionCollection.create({
     reflections: [
       { name: 'Test', html: '', secondsOfWriting: 1 },
       { name: 'Test 2', html: '<p>Hi!</p>', secondsOfWriting: 2 }
     ]
   }, {
     include: [ db.reflection ]
-  }).then((reflectionCollection) => {
-    this.reflections = reflectionCollection.get('reflections');
-    callback();
   });
+
+  return reflectionCollection.get('reflections');
 }
 
 describe('GET /reflections', function() {
-  beforeEach(function(done) {
+  beforeEach(function*() {
     this.request = {
       method: 'GET',
       url: '/reflections',
@@ -29,34 +28,28 @@ describe('GET /reflections', function() {
       }
     };
 
-    setupReflections.bind(this)(done);
+    this.reflections = yield setupReflections();
   });
 
-  it('shows reflections', function(done) {
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(200);
-      expect(response.result.length).toEqual(1);
-      expect(response.result[0].reflections.length).toEqual(2);
-      expect(response.result[0].reflections[0].id).toEqual(this.reflections[0].id);
-      expect(response.result[0].reflections[0].name).toEqual('Test');
-      done();
-    });
+  it('shows reflections', function*() {
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    expect(response.statusCode).toEqual(200);
+    expect(response.result.length).toEqual(1);
+    expect(response.result[0].reflections.length).toEqual(2);
+    expect(response.result[0].reflections[0].id).toEqual(this.reflections[0].id);
+    expect(response.result[0].reflections[0].name).toEqual('Test');
   });
 
-  it('requires headers', function(done) {
+  it('requires headers', function*() {
     delete this.request.headers;
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(401);
-      done();
-    });
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    expect(response.statusCode).toEqual(401);
   });
 
-  it('requires fresh headers', function(done) {
-    this.request.headers.Authorization = `Bearer ${authHelper.getExpiredToken()}`
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(401);
-      done();
-    });
+  it('requires fresh headers', function*() {
+    this.request.headers.Authorization = `Bearer ${authHelper.getExpiredToken()}`;
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    expect(response.statusCode).toEqual(401);
   });
 });
 
@@ -85,37 +78,27 @@ describe('POST reflections', function() {
     };
   });
 
-  it("responds with the created collection", function(done) {
-    server.inject(this.request, (response) => {
-      expect(response.statusCode).toEqual(200);
-      expect(response.result.reflections.length).toEqual(2);
-      done();
-    });
+  it("responds with the created collection", function*() {
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    expect(response.statusCode).toEqual(200);
+    expect(response.result.reflections.length).toEqual(2);
   });
 
-  it("creates a new reflectionCollection with multiple reflections", function(done) {
-    server.inject(this.request, (response) => {
-      db.reflectionCollection.count().then((count) => {
-        expect(count).toEqual(1);
+  it("creates a new reflectionCollection with multiple reflections", function*() {
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    let count = yield db.reflectionCollection.count();
+    expect(count).toEqual(1);
 
-        db.reflectionCollection.findOne().then((collection) => {
-          collection.getReflections().then((reflections) => {
-            expect(reflections.length).toEqual(2);
-            done();
-          });
-        });
-      });
-    });
+    let collection = yield db.reflectionCollection.findOne();
+    let reflections = yield collection.getReflections();
+    expect(reflections.length).toEqual(2);
   });
 
-  it("cleanly handles errors in the reflections", function(done) {
+  it("cleanly handles errors in the reflections", function*() {
     delete this.request.payload.reflections[1].name;
-    server.inject(this.request, (response) => {
-      db.reflection.count().then((count) => {
-        expect(count).toEqual(0);
-        expect(response.statusCode).toEqual(422);
-        done();
-      });
-    });
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    let count = yield db.reflection.count();
+    expect(count).toEqual(0);
+    expect(response.statusCode).toEqual(422);
   });
 });

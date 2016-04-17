@@ -24,12 +24,10 @@ describe("POST /auth", function() {
     passwordless._defaultDelivery.sendToken.calls.reset();
   });
 
-  it('is successful', function(done) {
-    server.inject(this.request, function(response) {
-      expect(response.statusCode).toEqual(200);
-      expect(response.result).toEqual({ status: "success" })
-      done();
-    });
+  it('is successful', function*() {
+    let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+    expect(response.statusCode).toEqual(200);
+    expect(response.result).toEqual({ status: "success" });
   });
 });
 
@@ -44,38 +42,29 @@ describe("GET /auth?token&uid", function() {
       passwordless._tokenStore.storeOrUpdate("token", "test@test.com", 60 * 60 * 1000, undefined, done);
     });
 
-    it('creates a user with the email', function(done) {
-      server.inject(this.request, (response) => {
-        db.user.findOne({ email: 'test@test.com' }).then((user) => {
-          expect(user).not.toEqual(null);
-          expect(user.get('email')).toEqual('test@test.com');
-          done();
-        });
-      });
+    it('creates a user with the email', function*() {
+      let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+      let user = yield db.user.findOne({ email: 'test@test.com' });
+      expect(user).not.toEqual(null);
+      expect(user.get('email')).toEqual('test@test.com');
     });
 
-    it("contains a valid auth token", function(done) {
-      server.inject(this.request, (response) => {
-        expect(response.statusCode).toEqual(200);
-        expect(response.result.token).toBeDefined();
+    it("contains a valid auth token", function*() {
+      let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+      expect(response.statusCode).toEqual(200);
+      expect(response.result.token).toBeDefined();
 
-        db.user.findOne({ email: 'test@test.com' }).then((user) => {
-          let payload = jwt.verify(response.result.token, 'test');
-          expect(payload.uid).toEqual(jasmine.any(Number));
-          expect(payload.uid).toEqual(user.get('id'));
-          done();
-        });
-      });
+      let user = yield db.user.findOne({ email: 'test@test.com' });
+      let payload = jwt.verify(response.result.token, 'test');
+      expect(payload.uid).toEqual(jasmine.any(Number));
+      expect(payload.uid).toEqual(user.get('id'));
     });
 
-    it('uses an old user with the email', function(done) {
-      db.user.create({ email: 'test@test.com' }).then((existingUser) => {
-        server.inject(this.request, (response) => {
-          let payload = jwt.verify(response.result.token, 'test');
-          expect(payload.uid).toEqual(existingUser.get('id'));
-          done();
-        });
-      });
+    it('uses an old user with the email', function*() {
+      let existingUser = yield db.user.create({ email: 'test@test.com' });
+      let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+      let payload = jwt.verify(response.result.token, 'test');
+      expect(payload.uid).toEqual(existingUser.get('id'));
     });
   });
 
@@ -87,10 +76,9 @@ describe("GET /auth?token&uid", function() {
       };
     });
 
-    it("is unauthorized", function() {
-      server.inject(this.request, (response) => {
-        expect(response.statusCode).toEqual(401);
-      });
+    it("is unauthorized", function*() {
+      let response = yield new Promise((resolve) => server.inject(this.request, resolve));
+      expect(response.statusCode).toEqual(401);
     });
   });
 });
