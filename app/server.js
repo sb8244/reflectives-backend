@@ -21,7 +21,7 @@ function createServer() {
   const port = process.env.PORT || 8000;
 
   server.connection({
-    host: 'localhost',
+    host: '0.0.0.0',
     port: port,
     routes: {
       cors: true
