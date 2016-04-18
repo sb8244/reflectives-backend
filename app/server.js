@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV || 'development';
 
 if (env === 'production') {
   const RedisStore = require('passwordless-redisstore');
-  passwordless.init(new RedisStore(process.env.REDIS_URL));
+  passwordless.init(new RedisStore(undefined, undefined, { url: process.env.REDIS_URL }));
 } else {
   const MemoryStore = require('passwordless-memorystore');
   passwordless.init(new MemoryStore());
