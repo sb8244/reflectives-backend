@@ -20,7 +20,7 @@
     "lodash": "^4.11.1",
     "nodemailer": "^2.3.2",
     "passwordless-hapi": "0.0.3",
-    "passwordless-redisstore": "^1.0.2",
+    "sb8244-passwordless-redisstore": "^1.0.2",
     "pg": "^4.5.2",
     "pg-hstore": "^2.3.2",
     "sequelize": "^3.20.0",
