@@ -3,10 +3,17 @@
 const Hapi = require('hapi');
 const passwordless = require('passwordless');
 const passwordlessPlugin = require('passwordless-hapi');
-const MemoryStore = require('passwordless-memorystore');
+const env = process.env.NODE_ENV || 'development';
+
+if (env === 'production') {
+  const RedisStore = require('passwordless-redisstore');
+  passwordless.init(new RedisStore(process.env.REDIS_URL));
+} else {
+  const MemoryStore = require('passwordless-memorystore');
+  passwordless.init(new MemoryStore());
+}
 const db = require('app/models');
 
-passwordless.init(new MemoryStore());
 passwordless.addDelivery(require('./email/passwordless'));
 
 function createServer() {
