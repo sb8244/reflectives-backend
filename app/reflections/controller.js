@@ -10,7 +10,7 @@ function* ReflectionsIndex(request, reply) {
   let collections = yield user.getReflectionCollections({
     include: [ db.reflection ],
     order: [
-      [ db.reflection, 'order', 'ASC' ]
+      [ db.reflectionCollection, 'id', 'DESC' ]
     ]
   });
 
