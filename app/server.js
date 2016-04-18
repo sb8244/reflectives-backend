@@ -33,7 +33,7 @@ function createServer() {
     function validate(request, decodedToken, callback) {
       var error, credentials = { uid: decodedToken.uid };
 
-      db.user.findOne({ email: decodedToken.uid }).then((user) => {
+      db.user.findById(decodedToken.uid).then((user) => {
         if (!user) {
           return callback(error, false, credentials);
         }

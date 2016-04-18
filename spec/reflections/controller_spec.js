@@ -26,6 +26,7 @@ function* setupReflections(user) {
 
 describe('GET /reflections', function() {
   beforeEach(function*() {
+    let otherUser = yield db.user.create({ email: "notme2@test.com" });
     this.user = yield db.user.create({ email: 'test@test.com' });
     this.reflections = yield setupReflections(this.user);
 
