@@ -6,7 +6,7 @@ const passwordlessPlugin = require('passwordless-hapi');
 const env = process.env.NODE_ENV || 'development';
 
 if (env === 'production') {
-  const RedisStore = require('passwordless-redisstore');
+  const RedisStore = require('sb8244-passwordless-redisstore');
   passwordless.init(new RedisStore(undefined, undefined, { url: process.env.REDIS_URL }));
 } else {
   const MemoryStore = require('passwordless-memorystore');
