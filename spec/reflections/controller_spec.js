@@ -6,13 +6,15 @@ const db = require('app/models/index');
 const authHelper = require('../helpers/auth');
 
 function* setupReflections(user) {
-  yield db.reflectionCollection.create({
+  let otherUser = yield db.user.create({ email: "notme@test.com" });
+  let otherCollection = yield db.reflectionCollection.create({
     reflections: [
       { name: 'Not Mine', html: '', secondsOfWriting: 1 },
     ]
   }, {
     include: [ db.reflection ]
   });
+  yield otherCollection.addUser(otherUser);
 
   let reflectionCollection = yield user.createReflectionCollection();
 
